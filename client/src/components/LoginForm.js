@@ -14,7 +14,7 @@ const LoginForm = () => {
   const [validated] = useState(false);
   const [showAlert, setShowAlert] = useState(false);
   // Declare state variables with useMutation hook for login mutation and loading status
-  const [login, { loading }] = useMutation(LOGIN_USER);
+  const [login, { error }] = useMutation(LOGIN_USER);
 
   // Define function to update state when user input changes
   const handleInputChange = (event) => {
@@ -35,7 +35,7 @@ const LoginForm = () => {
     try {
       // Use login mutation to log user in and store token in Auth
       const { data } = await login({
-        variables: userFormData,
+        variables: { ...userFormData },
       });
       Auth.login(data.login.token);
     } catch (err) {
@@ -50,11 +50,6 @@ const LoginForm = () => {
       password: "",
     });
   };
-
-  // If loading, return loading message
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   // Render login form
   return (

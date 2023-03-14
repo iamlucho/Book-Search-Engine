@@ -1,3 +1,4 @@
+import React, { useState, useEffect } from "react";
 import {
   Jumbotron,
   Container,
@@ -9,24 +10,33 @@ import {
 import { removeBookId } from "../utils/localStorage";
 import { useQuery, useMutation } from "@apollo/client";
 import { QUERY_ME } from "../utils/queries";
+import Auth from "../utils/auth";
 import { REMOVE_BOOK } from "../utils/mutations";
 
 const SavedBooks = () => {
-  const { data, loading } = useQuery(QUERY_ME);
-  var userData = data?.me || {};
-  const [removeBook] = useMutation(REMOVE_BOOK);
+  const { loading, data } = useQuery(QUERY_ME);
+  const [removeBook, { error }] = useMutation(REMOVE_BOOK);
+  const userData = data?.me || {};
 
-  async function handleDeleteBook(bookId) {
+  const handleDeleteBook = async (bookId) => {
+    const token = Auth.loggedIn() ? Auth.getToken() : null;
+
+    if (!token) {
+      return false;
+    }
+
     try {
-      await removeBook({
-        variables: { bookId: bookId },
+      const { data } = await removeBook({
+        variables: { bookId },
       });
+      // Remove bookid from localStorage
       removeBookId(bookId);
     } catch (err) {
       console.error(err);
     }
-  }
+  };
 
+  // Error handling
   if (loading) {
     return <h2>LOADING...</h2>;
   }
